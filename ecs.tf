@@ -95,6 +95,7 @@ resource "aws_spot_fleet_request" "ecs" {
   target_capacity             = "${var.cluster_size}"
   replace_unhealthy_instances = true
   wait_for_fulfillment        = true
+  terminate_instances_with_expiration = true
 }
 
 data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
