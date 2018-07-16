@@ -96,6 +96,10 @@ resource "aws_spot_fleet_request" "ecs" {
   replace_unhealthy_instances = true
   wait_for_fulfillment        = true
   terminate_instances_with_expiration = true
+  # reduce the downtime a bit..
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
@@ -128,12 +132,12 @@ data template_file "ecs_init" {
 }
 
 data "template_cloudinit_config" "ecs_init" {
-  gzip          = true
+  gzip          = false
   base64_encode = true
 
   "part" {
     filename     = "init.cfg"
-    content_type = "text/part-handler"
+    content_type = "text/x-shellscript"
     content      = "${data.template_file.ecs_init.rendered}"
   }
 }
