@@ -170,27 +170,18 @@ resource "aws_iam_instance_profile" "ecs_instance" {
   role = "${aws_iam_role.ecs_spotfleet.id}"
 }
 
+data "aws_iam_policy_document" "ecs_instance_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      identifiers = ["ec2.amazonaws.com"]
+      type = "Service"
+    }
+  }
+}
 resource "aws_iam_role" "ecs_instance" {
   name = "${data.aws_region.current.name}-ecs-instance-${var.stage}"
-
-  # TODO move this into a template to only replace the service!
-  # or what about https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html ?
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-
+  assume_role_policy = "${data.aws_iam_policy_document.ecs_instance_assume_role.json}"
   path = "/"
 }
 
