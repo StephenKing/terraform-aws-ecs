@@ -1,0 +1,33 @@
+[
+  {
+    "name": "init",
+    "image": "busybox",
+    "command": ["chown 1000:1000 /var/jenkins_home"],
+    "entrypoint": ["sh", "-c"],
+    "memory": 100,
+    "essential": false
+  },
+  {
+    "name": "jenkins",
+    "image": "emnify/jenkins:${jenkins_container_tag}",
+    "cpu": 128,
+    "memory": 2048,
+    "memoryReservation": 1024,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 8080
+      }
+    ],
+    "environment": [
+      {
+        "name": "JAVA_OPTS",
+        "value": "-Djenkins.install.runSetupWizard=false"
+      },
+      {
+        "name": "JENKINS_OPTS",
+        "value": "--httpPort=-1 --httpsPort=8443"
+      }
+    ]
+  }
+]
