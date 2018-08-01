@@ -29,6 +29,7 @@ module "vpc" {
   enable_nat_gateway = true
   enable_vpn_gateway = false
   single_nat_gateway = true
+  enable_dns_hostnames = true # also needed for EFS
 
   tags = {
     Terraform = "true"
@@ -133,7 +134,7 @@ data template_file "ecs_init" {
   vars {
     aws_region                = "${data.aws_region.current.name}"
     ecs_cluster               = "${aws_ecs_cluster.default.name}"
-    efs_file_system           = "TODO" // TODO!!
+    efs_file_system           = "${aws_efs_file_system.ecs.dns_name}" // TODO!!
     cloudwatch_log_group_name = "ECS-${aws_ecs_cluster.default.name}"
   }
 }

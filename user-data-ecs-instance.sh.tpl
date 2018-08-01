@@ -119,7 +119,7 @@ cat <<EOF > /usr/local/bin/mount_efs.sh
 #!/bin/bash
 mkdir -p /mnt/ECSFS
 if ! grep "/mnt/ECSFS" /etc/fstab ; then
-echo -e "\n${efs_file_system}.efs.${aws_region}.amazonaws.com:/    /mnt/ECSFS   nfs4    defaults,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2" >> /etc/fstab
+echo -e "\n${efs_file_system}:/    /mnt/ECSFS   nfs4    defaults,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2" >> /etc/fstab
 mount -a
 fi
 chown ec2-user:ec2-user /mnt/ECSFS
