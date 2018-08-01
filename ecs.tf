@@ -108,6 +108,9 @@ resource "aws_spot_fleet_request" "ecs" {
   lifecycle {
     create_before_destroy = true
   }
+  timeouts {
+    create = "5m"
+  }
 }
 
 data "aws_iam_policy" "AmazonEC2ReadOnlyAccess" {
