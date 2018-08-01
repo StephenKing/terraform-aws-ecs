@@ -69,12 +69,19 @@ resource "aws_security_group" "ecs_instance" {
   }
 }
 
+data "aws_ami" "ecs" {
+  most_recent = true
+  owners = ["amazon"]
+  filter {
+    name = "name"
+    values = ["amzn-ami-*-amazon-ecs-optimized"]
+  }
+}
 resource "aws_spot_fleet_request" "ecs" {
   iam_fleet_role = "${aws_iam_role.ecs_spotfleet.arn}"
 
   launch_specification {
-    # TODO use search
-    ami                  = "ami-5253c32d"
+    ami                  = "${data.aws_ami.ecs.id}"
     key_name             = "${var.ssh_key_name}"
     instance_type        = "m4.large"
     # TODO documentation says iam_instance_profile_arn ??
