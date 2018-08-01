@@ -78,7 +78,7 @@ data "aws_ami" "ecs" {
   }
 }
 resource "aws_spot_fleet_request" "ecs" {
-  iam_fleet_role = "${aws_iam_role.ecs_spotfleet.arn}"
+  iam_fleet_role = "${aws_iam_role.ecs_spotfleet_instance.arn}"
 
   launch_specification {
     ami                  = "${data.aws_ami.ecs.id}"
@@ -154,47 +154,33 @@ data "aws_iam_policy_document" "assume_spotfleet" {
     actions = ["sts:AssumeRole"]
     principals {
       type = "Service"
-      identifiers = ["spotfleet.amazonaws.com"]
+      identifiers = ["spotfleet.amazonaws.com", "ec2.amazonaws.com"]
     }
   }
 }
 
-resource "aws_iam_role" "ecs_spotfleet" {
-  name = "${data.aws_region.current.name}-ecs-spotfleet-${var.stage}"
+resource "aws_iam_role" "ecs_spotfleet_instance" {
+  name = "${data.aws_region.current.name}-ecs-spotfleet123-${var.stage}"
   assume_role_policy = "${data.aws_iam_policy_document.assume_spotfleet.json}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_AmazonEC2SpotFleetRole" {
   policy_arn = "${data.aws_iam_policy.AmazonEC2SpotFleetRole.arn}"
-  role       = "${aws_iam_role.ecs_spotfleet.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_AmazonEC2SpotFleetTaggingRole" {
   policy_arn = "${data.aws_iam_policy.AmazonEC2SpotFleetTaggingRole.arn}"
-  role       = "${aws_iam_role.ecs_spotfleet.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
 resource "aws_iam_instance_profile" "ecs_instance" {
   # better user name_prefix?
   name = "${data.aws_region.current.name}-ecs-instance-${var.stage}"
   path = "/"
-  role = "${aws_iam_role.ecs_spotfleet.id}"
+  role = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
-data "aws_iam_policy_document" "ecs_instance_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      identifiers = ["ec2.amazonaws.com"]
-      type = "Service"
-    }
-  }
-}
-resource "aws_iam_role" "ecs_instance" {
-  name = "${data.aws_region.current.name}-ecs-instance-${var.stage}"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_instance_assume_role.json}"
-  path = "/"
-}
 
 #  Allow the spot instance to set itself to DRAINING on termination notification
 resource "aws_iam_policy" "ecs_instance_state" {
@@ -234,20 +220,20 @@ resource "aws_iam_policy" "ecs_instance_cloudwatch_logs" {
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_AmazonEC2ReadOnlyAccess" {
   policy_arn = "${data.aws_iam_policy.AmazonEC2ReadOnlyAccess.arn}"
-  role       = "${aws_iam_role.ecs_instance.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_AmazonEC2ContainerServiceforEC2Role" {
   policy_arn = "${data.aws_iam_policy.AmazonEC2ContainerServiceforEC2Role.arn}"
-  role       = "${aws_iam_role.ecs_instance.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_state" {
   policy_arn = "${aws_iam_policy.ecs_instance_state.arn}"
-  role       = "${aws_iam_role.ecs_instance.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_cloudwatch_logs" {
   policy_arn = "${aws_iam_policy.ecs_instance_cloudwatch_logs.arn}"
-  role       = "${aws_iam_role.ecs_instance.id}"
+  role       = "${aws_iam_role.ecs_spotfleet_instance.id}"
 }
